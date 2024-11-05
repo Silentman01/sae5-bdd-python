@@ -1,0 +1,6 @@
+_id,username,avatar_url,full_name,email,password,birthdate,interests,friends,groups,pages,created_at
+1,johndoe,avatar1.png,John Doe,john@example.com,pass1,1990-01-01,"['sports', 'music']","['2', '3']",['1'],['1'],2023-01-01
+2,janedoe,avatar2.png,Jane Doe,jane@example.com,pass2,1992-02-02,"['reading', 'art']","['1', '3']",['1'],['2'],2023-01-02
+3,alicesmith,avatar3.png,Alice Smith,alice@example.com,pass3,1988-03-03,"['music', 'travel']","['1', '2', '4']",['2'],"['1', '2']",2023-01-03
+4,bobbrown,avatar4.png,Bob Brown,bob@example.com,pass4,1995-04-04,"['sports', 'tech']",['3'],"['1', '2']",[],2023-01-04
+5,charliewhite,avatar5.png,Charlie White,charlie@example.com,pass5,1993-05-05,"['art', 'tech']",[''],[''],[],2023-01-05

@@ -1,0 +1,3 @@
+_id,user_id,content,media_url,likes,comments,created_at
+1,1,Loving this new song!,song.mp3,"['2', '3']","[{'user_id': '2', 'text': 'Great song!'}]",2023-01-05
+2,2,Amazing travel experience!,photo.jpg,"['1', '3']","[{'user_id': '1', 'text': 'Looks amazing!'}]",2023-01-06
