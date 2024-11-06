@@ -3,28 +3,69 @@ from py2neo import Graph, Node, Relationship, NodeMatcher
 # Connexion à Neo4j
 graph = Graph("bolt://localhost:7687", auth=("neo4j", "rootroot"))
 
-# Fonction pour créer un nœud utilisateur
-def create_user(id, username, avatar_url, full_name, email, birthdate, interests, created_at):
-    user = Node("User", id=id, username=username, avatar_url=avatar_url, 
-                full_name=full_name, email=email, birthdate=birthdate, 
-                interests=interests, created_at=created_at)
+def create_user(id: str, username: str, avatar_url: str, full_name: str, email: str, birthdate: str, interests: list, created_at: str) -> Node:
+    """
+    Crée un nœud utilisateur dans la base de données Neo4j.
+
+    Args:
+        id (str): Identifiant unique de l'utilisateur.
+        username (str): Nom d'utilisateur.
+        avatar_url (str): URL de l'avatar.
+        full_name (str): Nom complet de l'utilisateur.
+        email (str): Adresse email de l'utilisateur.
+        birthdate (str): Date de naissance de l'utilisateur.
+        interests (list): Liste des intérêts de l'utilisateur.
+        created_at (str): Date de création de l'utilisateur.
+
+    Returns:
+        Node: Nœud utilisateur créé.
+    """
+    user = Node("User", id=id, username=username, avatar_url=avatar_url, full_name=full_name, email=email, birthdate=birthdate, interests=interests, created_at=created_at)
     graph.merge(user, "User", "id")
     return user
 
-# Fonction pour créer un nœud groupe
-def create_group(id, name, description, created_at):
+def create_group(id: str, name: str, description: str, created_at: str) -> Node:
+    """
+    Crée un nœud groupe dans la base de données Neo4j.
+
+    Args:
+        id (str): Identifiant unique du groupe.
+        name (str): Nom du groupe.
+        description (str): Description du groupe.
+        created_at (str): Date de création du groupe.
+
+    Returns:
+        Node: Nœud groupe créé.
+    """
     group = Node("Group", id=id, name=name, description=description, created_at=created_at)
     graph.merge(group, "Group", "id")
     return group
 
-# Fonction pour créer un nœud page
-def create_page(id, name, description, created_at):
+def create_page(id: str, name: str, description: str, created_at: str) -> Node:
+    """
+    Crée un nœud page dans la base de données Neo4j.
+
+    Args:
+        id (str): Identifiant unique de la page.
+        name (str): Nom de la page.
+        description (str): Description de la page.
+        created_at (str): Date de création de la page.
+
+    Returns:
+        Node: Nœud page créé.
+    """
     page = Node("Page", id=id, name=name, description=description, created_at=created_at)
     graph.merge(page, "Page", "id")
     return page
 
-# Fonction pour créer des relations (d'amitié, de membre, de suivi, d'intérêt)
-def create_friendship(user_id_1, user_id_2):
+def create_friendship(user_id_1: str, user_id_2: str) -> None:
+    """
+    Crée une relation d'amitié entre deux utilisateurs.
+
+    Args:
+        user_id_1 (str): ID du premier utilisateur.
+        user_id_2 (str): ID du second utilisateur.
+    """
     matcher = NodeMatcher(graph)
     user1 = matcher.match("User", id=user_id_1).first()
     user2 = matcher.match("User", id=user_id_2).first()
@@ -32,7 +73,14 @@ def create_friendship(user_id_1, user_id_2):
         friendship = Relationship(user1, "FRIENDS", user2)
         graph.create(friendship)
 
-def create_membership(user_id, group_id):
+def create_membership(user_id: str, group_id: str) -> None:
+    """
+    Crée une relation de membre entre un utilisateur et un groupe.
+
+    Args:
+        user_id (str): ID de l'utilisateur.
+        group_id (str): ID du groupe.
+    """
     matcher = NodeMatcher(graph)
     user = matcher.match("User", id=user_id).first()
     group = matcher.match("Group", id=group_id).first()
@@ -40,7 +88,15 @@ def create_membership(user_id, group_id):
         membership = Relationship(user, "MEMBER_OF", group)
         graph.create(membership)
 
-def create_follow(user_id, followed_id, followed_type="Page"):
+def create_follow(user_id: str, followed_id: str, followed_type: str = "Page") -> None:
+    """
+    Crée une relation de suivi entre un utilisateur et une page ou un autre utilisateur.
+
+    Args:
+        user_id (str): ID de l'utilisateur.
+        followed_id (str): ID de l'entité suivie.
+        followed_type (str): Type de l'entité suivie (par défaut "Page").
+    """
     matcher = NodeMatcher(graph)
     user = matcher.match("User", id=user_id).first()
     followed = matcher.match(followed_type, id=followed_id).first()
@@ -48,7 +104,14 @@ def create_follow(user_id, followed_id, followed_type="Page"):
         follow = Relationship(user, "FOLLOWS", followed)
         graph.create(follow)
 
-def create_interest(user_id, interest):
+def create_interest(user_id: str, interest: str) -> None:
+    """
+    Crée une relation d'intérêt entre un utilisateur et un intérêt.
+
+    Args:
+        user_id (str): ID de l'utilisateur.
+        interest (str): Intérêt de l'utilisateur.
+    """
     matcher = NodeMatcher(graph)
     user = matcher.match("User", id=user_id).first()
     if user:

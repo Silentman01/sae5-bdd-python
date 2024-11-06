@@ -6,29 +6,30 @@ from datetime import datetime
 
 # Connexion à la base de données MongoDB
 client = MongoClient("mongodb://localhost:27017")
+# Nom de notre bdd
 db = client.sae5bdd
 
 def import_data_from_csv(filename: str, collection_name: str) -> None:
     """
-    Importe des données depuis un fichier CSV vers une collection MongoDB spécifiée.
+    Importation des données à partir d'un fichier CSV dans la collection collection_name
     
     Args:
-        filename (str): Le nom du fichier CSV source contenant les données à importer.
-        collection_name (str): Le nom de la collection MongoDB de destination.
+        filename (str): Le nom du fichier CSV contenant les données à importer
+        collection_name (str): Le nom de la collection
 
     Retourne:
         None
 
     Fonctionnement:
-        - Lit le fichier CSV ligne par ligne.
-        - Crée un document adapté au schéma de la collection en fonction du `collection_name`.
-        - Insère chaque document dans la collection MongoDB spécifiée.
+        - Lit le fichier CSV ligne par ligne
+        - Crée un document adapté au schéma de la collection collection_name
+        - Insère chaque document dans la collection collection_name
     """
-    # Ouvrir le fichier CSV en lecture
+    # Lecture du fichier CSV
     with open(filename, 'r') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            # Définir le document en fonction de la collection cible
+            # Création du document en fonction de la collection
             if collection_name == "Users":
                 document = {
                     "username": row['username'],
@@ -76,10 +77,10 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                     "created_at": row['created_at']
                 }
             else:
-                print(f"Collection {collection_name} non reconnue.")
+                print(f"La collection {collection_name} n'existe pas.")
                 return
 
-            # Insérer le document dans la collection MongoDB
+            # Insérer le document dans la collection
             db[collection_name].insert_one(document)
     
     print(f"Import des données dans la collection {collection_name} terminé.")
@@ -92,23 +93,23 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
 # import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
 
 
-def export_data_to_csv(collection_name: str, filename: str) -> None:
+def export_data_to_csv(filename: str, collection_name: str) -> None:
     """
-    Exporte les données d'une collection MongoDB vers un fichier CSV.
+    Exportation des données à partir de la collection collection_name dans un fichier CSV
     
     Args:
-        collection_name (str): Le nom de la collection MongoDB à exporter.
-        filename (str): Le nom du fichier CSV de destination.
+        filename (str): Le nom du fichier CSV contenant les données à importer
+        collection_name (str): Le nom de la collection
 
     Retourne:
         None
 
     Fonctionnement:
-        - Récupère tous les documents de la collection spécifiée.
-        - Détecte tous les champs uniques parmi les documents pour les utiliser comme en-têtes CSV.
-        - Écrit chaque document dans le fichier CSV, en assurant que tous les champs sont présents dans chaque ligne.
+        - Récupère tous les documents de la collection collection_name
+        - Détecte tous les champs uniques parmi les documents pour les utiliser comme en-têtes CSV
+        - Écrit chaque document dans le fichier CSV, en assurant que tous les champs sont présents dans chaque ligne
     """
-    # Accéder à la collection spécifiée
+    # Accéder à la collection
     collection = db[collection_name]
     
     # Récupérer tous les documents de la collection
@@ -123,35 +124,35 @@ def export_data_to_csv(collection_name: str, filename: str) -> None:
     all_fields = set()
     for doc in documents:
         all_fields.update(doc.keys())
-    all_fields = sorted(all_fields)  # Tri des champs pour un ordre constant
+    all_fields = sorted(all_fields)  # On tri les champs
 
     # Écriture des données dans le fichier CSV
     with open(filename, 'w', newline='') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=all_fields)
         writer.writeheader()
         
-        # Parcourir chaque document et écrire les valeurs dans le CSV
+        # Parcourir chaque document et les mettre dans le CSV
         for doc in documents:
             # Créer une ligne pour chaque document avec des champs manquants remplis par des chaînes vides
             row = {field: doc.get(field, '') for field in all_fields}
-            # Convertir l'ObjectId en chaîne de caractères
+            # Convertir l'ObjectId en string
             row['_id'] = str(row['_id'])
             writer.writerow(row)
     
     print(f"Export des données de la collection {collection_name} vers {filename} terminé.")
 
 # Exemple d'utilisation pour exporter les collections
-export_data_to_csv('Users', 'csv data/exports/users_export.csv')
-# export_data_to_csv('Groups', 'csv data/exports/groups_export.csv')
-# export_data_to_csv('Posts', 'csv data/exports/posts_export.csv')
-# export_data_to_csv('Messages', 'csv data/exports/messages_export.csv')
-# export_data_to_csv('Pages', 'csv data/exports/pages_export.csv')
+#export_data_to_csv('csv data/exports/users_export.csv', 'Users')
+# export_data_to_csv('csv data/exports/groups_export.csv', 'Groups')
+# export_data_to_csv('csv data/exports/posts_export.csv', 'Posts')
+# export_data_to_csv('csv data/exports/messages_export.csv', 'Messages')
+# export_data_to_csv('csv data/exports/pages_export.csv', 'Pages')
 
 
 def daily_backup():
     """
-    Fonction de sauvegarde quotidienne : Exporte toutes les collections vers des fichiers CSV
-    avec un nom de fichier unique incluant la date.
+    Fonction de sauvegarde de la bdd : Exporte toutes les collections vers des fichiers CSV individuels
+    avec un nom de fichier unique incluant la date de sauvegarde.
     """
     # Liste des collections à sauvegarder
     collections = ["Users", "Groups", "Posts", "Messages", "Pages"]
@@ -162,15 +163,15 @@ def daily_backup():
     for collection in collections:
         # Nom du fichier avec la date pour éviter l'écrasement
         filename = f"{collection.lower()}_backup_{current_date}.csv"
-        export_data_to_csv(collection, filename)
+        export_data_to_csv(filename, collection)
     
-    print("Sauvegarde quotidienne terminée.")
+    print("Sauvegarde terminée.")
 
-# Planifier l'exécution quotidienne à 00h00
+# Planifier la sauvegarde quotidienne à 00h00
 schedule.every().day.at("00:00").do(daily_backup)
 
-# Boucle infinie pour vérifier les tâches planifiées
+# Boucle pour vérifier s'il est temps de faire la sauvegarde
 while True:
     print("En attente de la prochaine sauvegarde...")
     schedule.run_pending()
-    time.sleep(60)  # Vérifie les tâches toutes les minutes
+    time.sleep(120)
