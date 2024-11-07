@@ -1,4 +1,4 @@
 id,username,avatar_url,full_name,email,password,birthdate,interests,friends,groups,pages,created_at
-1,johndoe,avatar1.png,John Doe,john@example.com,password1,1990-01-01,"sports,music","2,3",1,1,2023-01-01
-2,janedoe,avatar2.png,Jane Doe,jane@example.com,password2,1992-02-02,"reading,art",1,,2,2023-01-02
-3,alicesmith,avatar3.png,Alice Smith,alice@example.com,password3,1988-03-03,"music,travel",1,2,3,2023-01-03
+1,johndoe,avatar1.png,John Doe,john@example.com,password1,01-01-1990,"sports,music","2,3",1,1,01-11-2024
+2,janedoe,avatar2.png,Jane Doe,jane@example.com,password2,02-02-1992,"reading,art",1,,2,01-11-2024
+3,alicesmith,avatar3.png,Alice Smith,alice@example.com,password3,03-03-1988,"music,travel",1,2,3,01-11-2024

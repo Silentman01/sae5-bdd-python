@@ -106,11 +106,11 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
     print("Importation csv: terminé")
 
 # On importe des données d'exemple
-# import_data_from_csv('csv data/imports/users_data.csv', 'Users')
-# import_data_from_csv('csv data/imports/groups_data.csv', 'Groups')
-# import_data_from_csv('csv data/imports/posts_data.csv', 'Posts')
-# import_data_from_csv('csv data/imports/messages_data.csv', 'Messages')
-# import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
+import_data_from_csv('csv data/imports/users_data.csv', 'Users')
+import_data_from_csv('csv data/imports/groups_data.csv', 'Groups')
+import_data_from_csv('csv data/imports/posts_data.csv', 'Posts')
+import_data_from_csv('csv data/imports/messages_data.csv', 'Messages')
+import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
 
 
 # Exporter en CSV

@@ -27,7 +27,7 @@ def sync_users():
                           birthdate=user["birthdate"], 
                           interests=user["interests"],
                           created_at=user["created_at"])
-        # Créer le noeud, s'il existe déjà ça met juste à jour les valeurs
+        # Créer le noeud, s'il existe déjà ça met juste à jour les valeurs du noeud existant
         neo4j_graph.merge(neo4j_user, "Users", "id")
 
 def sync_groups():
@@ -145,10 +145,10 @@ def full_synchronization():
     print("Synchro middleware: terminé")
 
 # Planification de la synchronisation quotidienne à minuit
-schedule.every().day.at("00:00").do(full_synchronization)
+schedule.every().day.at("12:51").do(full_synchronization)
 
 # Boucle pour vérifier s'il est l'heure de faire la synchro
 while True:
     print("En attente de la prochaine synchronisation...")
     schedule.run_pending()
-    time.sleep(120)
+    time.sleep(5)
