@@ -51,6 +51,7 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
             # Création du document en fonction de la collection
             if collection_name == "Users":
                 document = {
+                    "id": row['id'],
                     "username": row['username'],
                     "avatar_url": row['avatar_url'],
                     "full_name": row['full_name'],
@@ -65,6 +66,7 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                 }
             elif collection_name == "Groups":
                 document = {
+                    "id": row['id'],
                     "name": row['name'],
                     "description": row['description'],
                     "members": row['members'].split(',') if row['members'] else [],
@@ -91,6 +93,7 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                 }
             elif collection_name == "Pages":
                 document = {
+                    "id": row['id'],
                     "name": row['name'],
                     "description": row['description'],
                     "followers": row['followers'].split(',') if row['followers'] else [],

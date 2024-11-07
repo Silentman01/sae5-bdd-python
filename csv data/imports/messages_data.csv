@@ -1,3 +1,4 @@
-_id,sender_id,receiver_id,content,created_at
+id,sender_id,receiver_id,content,created_at
 1,1,2,Hello!,2023-01-01
-2,2,3,How are you?,2023-01-02
+2,2,3,Hi!,2023-01-02
+3,3,1,Hey!,2023-01-03
