@@ -4,7 +4,7 @@ import time
 from pymongo import MongoClient
 from datetime import datetime
 
-# Connexion à la base de données MongoDB
+# Connexion à la bdd MongoDB
 client = MongoClient("mongodb://localhost:27017")
 # Nom de notre bdd
 db = client.sae5bdd
