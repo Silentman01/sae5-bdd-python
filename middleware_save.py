@@ -17,7 +17,7 @@ def sync_users():
     Synchronise la collection Users de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for user in db.Users.find():
-        user_id = str(user["_id"])  # Convertir ObjectId en string sinon j'ai une erreur
+        user_id = user["id"]  # Utiliser "id" directement
         neo4j_user = Node("User", id=user_id, username=user["username"], avatar_url=user["avatar_url"], 
                           full_name=user["full_name"], email=user["email"], birthdate=user["birthdate"], 
                           interests=user["interests"], created_at=user["created_at"])
@@ -28,9 +28,9 @@ def sync_groups():
     Synchronise la collection Groups de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for group in db.Groups.find():
-        group_id = str(group["_id"])  # Convertir ObjectId en chaîne
+        group_id = group["id"]  # Utiliser "id" directement
         neo4j_group = Node("Group", id=group_id, name=group["name"], description=group["description"], 
-                           created_by=str(group["created_by"]), created_at=group["created_at"])
+                           created_by=group["created_by"], created_at=group["created_at"])
         neo4j_graph.merge(neo4j_group, "Group", "id")
 
 def sync_pages():
@@ -38,9 +38,9 @@ def sync_pages():
     Synchronise la collection Pages de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for page in db.Pages.find():
-        page_id = str(page["_id"])  # Convertir ObjectId en chaîne
+        page_id = page["id"]  # Utiliser "id" directement
         neo4j_page = Node("Page", id=page_id, name=page["name"], description=page["description"], 
-                          created_by=str(page["created_by"]), created_at=page["created_at"])
+                          created_by=page["created_by"], created_at=page["created_at"])
         neo4j_graph.merge(neo4j_page, "Page", "id")
 
 def sync_friendships():
@@ -49,11 +49,11 @@ def sync_friendships():
     Exemple: Users1 FRIENDSHIPS Users2
     """
     for user in db.Users.find():
-        user_id = str(user["_id"])
+        user_id = user["id"]
         neo4j_user = matcher.match("User", id=user_id).first()
         if neo4j_user:
             for friend_id in user.get("friends", []):
-                friend = matcher.match("User", id=str(friend_id)).first()
+                friend = matcher.match("User", id=friend_id).first()
                 if friend:
                     neo4j_graph.merge(Relationship(neo4j_user, "FRIENDS", friend))
 
@@ -63,11 +63,11 @@ def sync_memberships():
     Exemple: Users1 MEMBERSHIPS Groups1
     """
     for user in db.Users.find():
-        user_id = str(user["_id"])
+        user_id = user["id"]
         neo4j_user = matcher.match("User", id=user_id).first()
         if neo4j_user:
             for group_id in user.get("groups", []):
-                group = matcher.match("Group", id=str(group_id)).first()
+                group = matcher.match("Group", id=group_id).first()
                 if group:
                     neo4j_graph.merge(Relationship(neo4j_user, "MEMBER_OF", group))
 
@@ -77,11 +77,11 @@ def sync_page_follows():
     Exemple: Users1 FOLLOWS Pages1
     """
     for user in db.Users.find():
-        user_id = str(user["_id"])
+        user_id = user["id"]
         neo4j_user = matcher.match("User", id=user_id).first()
         if neo4j_user:
             for page_id in user.get("pages", []):
-                page = matcher.match("Page", id=str(page_id)).first()
+                page = matcher.match("Page", id=page_id).first()
                 if page:
                     neo4j_graph.merge(Relationship(neo4j_user, "FOLLOWS", page))
 

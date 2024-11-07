@@ -9,6 +9,7 @@ client = MongoClient("mongodb://localhost:27017")
 # Nom de notre bdd
 db = client.sae5bdd
 
+# Importer en CSV
 def import_data_from_csv(filename: str, collection_name: str) -> None:
     """
     Importation des données à partir d'un fichier CSV dans la collection collection_name
@@ -106,13 +107,14 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
             print(f"Document importé dans la collection {collection_name}: {unique_field}")
 
 # Exemple d'utilisation pour importer dans chaque collection
-import_data_from_csv('csv data/imports/users_data.csv', 'Users')
-import_data_from_csv('csv data/imports/groups_data.csv', 'Groups')
-import_data_from_csv('csv data/imports/posts_data.csv', 'Posts')
-import_data_from_csv('csv data/imports/messages_data.csv', 'Messages')
-import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
+# import_data_from_csv('csv data/imports/users_data.csv', 'Users')
+# import_data_from_csv('csv data/imports/groups_data.csv', 'Groups')
+# import_data_from_csv('csv data/imports/posts_data.csv', 'Posts')
+# import_data_from_csv('csv data/imports/messages_data.csv', 'Messages')
+# import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
 
 
+# Exporter en CSV
 def export_data_to_csv(filename: str, collection_name: str) -> None:
     """
     Exportation des données à partir de la collection collection_name dans un fichier CSV
@@ -160,7 +162,7 @@ def export_data_to_csv(filename: str, collection_name: str) -> None:
 # export_data_to_csv('csv data/exports/messages_export.csv', 'Messages')
 # export_data_to_csv('csv data/exports/pages_export.csv', 'Pages')
 
-
+# Sauvegarde de la bdd MongoDB
 def daily_backup():
     """
     Fonction de sauvegarde de la bdd : Exporte toutes les collections vers des fichiers CSV individuels
