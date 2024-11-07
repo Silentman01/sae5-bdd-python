@@ -17,7 +17,7 @@ def sync_users():
     Synchronise la collection Users de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for user in db.Users.find():
-        user_id = user["id"]  # Utiliser "id" directement
+        user_id = user["id"]
         neo4j_user = Node("User", id=user_id, username=user["username"], avatar_url=user["avatar_url"], 
                           full_name=user["full_name"], email=user["email"], birthdate=user["birthdate"], 
                           interests=user["interests"], created_at=user["created_at"])
@@ -28,7 +28,7 @@ def sync_groups():
     Synchronise la collection Groups de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for group in db.Groups.find():
-        group_id = group["id"]  # Utiliser "id" directement
+        group_id = group["id"]
         neo4j_group = Node("Group", id=group_id, name=group["name"], description=group["description"], 
                            created_by=group["created_by"], created_at=group["created_at"])
         neo4j_graph.merge(neo4j_group, "Group", "id")
@@ -38,15 +38,30 @@ def sync_pages():
     Synchronise la collection Pages de MongoDB vers Neo4j sans supprimer les anciens nœuds.
     """
     for page in db.Pages.find():
-        page_id = page["id"]  # Utiliser "id" directement
+        page_id = page["id"]
         neo4j_page = Node("Page", id=page_id, name=page["name"], description=page["description"], 
                           created_by=page["created_by"], created_at=page["created_at"])
         neo4j_graph.merge(neo4j_page, "Page", "id")
 
+def sync_posts():
+    """
+    Synchronise la collection Posts de MongoDB vers Neo4j et crée les relations entre les utilisateurs et leurs posts.
+    """
+    for post in db.Posts.find():
+        post_id = post["id"]
+        neo4j_post = Node("Post", id=post_id, content=post["content"], media_url=post["media_url"], 
+                          created_at=post["created_at"])
+        neo4j_graph.merge(neo4j_post, "Post", "id")
+        
+        # Créer la relation "CREATES" entre l'utilisateur et son post
+        user_id = post["user_id"]
+        neo4j_user = matcher.match("User", id=user_id).first()
+        if neo4j_user:
+            neo4j_graph.merge(Relationship(neo4j_user, "CREATES", neo4j_post))
+
 def sync_friendships():
     """
     Synchronise les relations d'amitié entre utilisateurs de MongoDB vers Neo4j.
-    Exemple: Users1 FRIENDSHIPS Users2
     """
     for user in db.Users.find():
         user_id = user["id"]
@@ -60,7 +75,6 @@ def sync_friendships():
 def sync_memberships():
     """
     Synchronise les relations de membre entre utilisateurs et groupes de MongoDB vers Neo4j.
-    Exemple: Users1 MEMBERSHIPS Groups1
     """
     for user in db.Users.find():
         user_id = user["id"]
@@ -74,7 +88,6 @@ def sync_memberships():
 def sync_page_follows():
     """
     Synchronise les relations de suivi entre utilisateurs et pages de MongoDB vers Neo4j.
-    Exemple: Users1 FOLLOWS Pages1
     """
     for user in db.Users.find():
         user_id = user["id"]
@@ -85,25 +98,39 @@ def sync_page_follows():
                 if page:
                     neo4j_graph.merge(Relationship(neo4j_user, "FOLLOWS", page))
 
+def sync_likes():
+    """
+    Synchronise les relations "LIKE" entre utilisateurs et posts de MongoDB vers Neo4j.
+    """
+    for post in db.Posts.find():
+        post_id = post["id"]
+        neo4j_post = matcher.match("Post", id=post_id).first()
+        if neo4j_post:
+            for user_id in post.get("likes", []):
+                neo4j_user = matcher.match("User", id=user_id).first()
+                if neo4j_user:
+                    neo4j_graph.merge(Relationship(neo4j_user, "LIKES", neo4j_post))
+
 def full_synchronization():
     """
-    Fonction de synchronisation complète qui synchronise tous les utilisateurs, groupes, pages,
-    relations d'amitié, relations de membre et relations de suivi de MongoDB vers Neo4j sans supprimer les nœuds existants.
+    Fonction qui regroupe toute les synchronisations de la bdd MongoDB vers la bdd neo4j
     """
     sync_users()
     sync_groups()
     sync_pages()
+    sync_posts()
     sync_friendships()
     sync_memberships()
     sync_page_follows()
+    sync_likes()
     
     print(f"Synchronisation middleware terminée à {datetime.now()}")
 
 # Planification de la synchronisation quotidienne à minuit
-schedule.every().day.at("00:00").do(full_synchronization)
+schedule.every().day.at("10:44").do(full_synchronization)
 
-# Boucle pour vérifier s'il est temps de faire la synchronisation
+# Boucle pour vérifier s'il est l'heure de faire la synchro
 while True:
     print("En attente de la prochaine synchronisation...")
     schedule.run_pending()
-    time.sleep(120)
+    time.sleep(5)
