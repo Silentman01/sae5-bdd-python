@@ -2,6 +2,7 @@ from py2neo import Graph, Node, Relationship, NodeMatcher
 
 # Connexion à Neo4j
 graph = Graph("bolt://localhost:7687", auth=("neo4j", "rootroot"))
+graph.delete_all()
 
 def create_user(id: str, username: str, avatar_url: str, full_name: str, email: str, birthdate: str, interests: list, created_at: str) -> Node:
     """
