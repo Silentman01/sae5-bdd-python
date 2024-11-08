@@ -18,7 +18,7 @@ def get_friend_recommendations_by_common_friends(user_id: str, limit: int = MAX_
         list: Liste de dictionnaires contenant les informations des amis recommandés (id utilisateur, nombre d'amis en commun)
     """
     query = f"""
-        MATCH (u:User {{id: "{user_id}"}})-[:FRIENDS]->(friend:User)-[:FRIENDS]->(recommended)
+        MATCH (u:Users {{id: "{user_id}"}})-[:FRIENDS]->(friend:Users)-[:FRIENDS]->(recommended)
         WHERE NOT (u)-[:FRIENDS]->(recommended) AND u <> recommended
         WITH recommended, COUNT(friend) AS commonFriends
         RETURN recommended.id AS recommended_user,
@@ -47,7 +47,7 @@ def get_friend_recommendations_by_common_interests(user_id: str, limit: int = MA
         list: Liste de dictionnaires contenant les informations des amis recommandés (id utilisateur, nombre d'intérêts en commun)
     """
     query = f"""
-        MATCH (u:User {{id: "{user_id}"}})-[:HAS_INTEREST]->(interest)<-[:HAS_INTEREST]-(recommended)
+        MATCH (u:Users {{id: "{user_id}"}})-[:HAS_INTEREST]->(interest)<-[:HAS_INTEREST]-(recommended)
         WHERE NOT (u)-[:FRIENDS]->(recommended) AND u <> recommended
         WITH recommended, COUNT(interest) AS commonInterests
         RETURN recommended.id AS recommended_user,
@@ -76,7 +76,7 @@ def get_group_recommendations(user_id: str, limit: int = MAX_RECOMMANDATIONS) ->
         list: Liste de dictionnaires contenant les informations des groupes recommandés (id du groupe, nom, nombre d'amis dans le groupe)
     """
     query = f"""
-        MATCH (u:User {{id: "{user_id}"}})-[:FRIENDS]->(friend:User)-[:MEMBER_OF]->(group:Group)
+        MATCH (u:Users {{id: "{user_id}"}})-[:FRIENDS]->(friend:Users)-[:MEMBER_OF]->(group:Groups)
         WHERE NOT (u)-[:MEMBER_OF]->(group)
         RETURN group.id AS group_id,
                group.name AS group_name,
@@ -106,7 +106,7 @@ def get_page_recommendations(user_id: str, limit: int = MAX_RECOMMANDATIONS) -> 
         list: Liste de dictionnaires contenant les informations des pages recommandées (id de la page, nom, nombre d'amis qui suivent la page)
     """
     query = f"""
-        MATCH (u:User {{id: "{user_id}"}})-[:FRIENDS]->(friend:User)-[:FOLLOWS]->(page:Page)
+        MATCH (u:Users {{id: "{user_id}"}})-[:FRIENDS]->(friend:Users)-[:FOLLOWS]->(page:Pages)
         WHERE NOT (u)-[:FOLLOWS]->(page)
         RETURN page.id AS page_id,
                page.name AS page_name,
