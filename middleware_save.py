@@ -87,6 +87,12 @@ def sync_pages():
                           createdAt=page["createdAt"])
         neo4j_graph.merge(neo4j_page, "Pages", "id")
 
+        # Créer la relation "CREATED_PAGES" entre l'utilisateur et son post
+        userId = createdBy_id
+        neo4j_user = matcher.match("Users", id=userId).first()
+        if neo4j_user:
+            neo4j_graph.merge(Relationship(neo4j_user, "CREATED_PAGE", neo4j_page))
+
     print("Synch pages: terminé")
 
 def sync_posts():
@@ -124,8 +130,8 @@ def sync_privates_messages():
         neo4j_graph.merge(neo4j_privateMessage, "PrivateMessage", "id")
 
         # Créer la relation "SEND_MESSAGE" et "RECEIVE_MESSAGE" entre les deux utilisateurs et le message
-        sender_id = privateMessage["sender_id"]
-        receiver_id = privateMessage["receiver_id"]
+        sender_id = binary_id_to_str(privateMessage["sender_id"])
+        receiver_id = binary_id_to_str(privateMessage["receiver_id"])
         neo4j_sender = matcher.match("Users", id=sender_id).first()
         neo4j_receiver = matcher.match("Users", id=receiver_id).first()
         if neo4j_sender and neo4j_receiver:
@@ -173,6 +179,7 @@ def sync_page_follows():
         neo4j_user = matcher.match("Users", id=user_id).first()
         if neo4j_user:
             for page_id in user.get("pages", []):
+                page_id = binary_id_to_str(page_id)
                 page = matcher.match("Pages", id=page_id).first()
                 if page:
                     neo4j_graph.merge(Relationship(neo4j_user, "FOLLOWS", page))
