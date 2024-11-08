@@ -53,7 +53,7 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                 document = {
                     "id": row['id'],
                     "username": row['username'],
-                    "avatar_url": row['avatar_url'],
+                    "avatar": row['avatar'],
                     "full_name": row['full_name'],
                     "email": row['email'],
                     "password": row['password'],

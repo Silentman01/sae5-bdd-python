@@ -21,7 +21,7 @@ def sync_users():
         neo4j_user = Node("Users",
                           id=user_id,
                           username=user["username"],
-                          avatar_url=user["avatar_url"], 
+                          avatar=user["avatar"], 
                           full_name=user["full_name"],
                           email=user["email"],
                           password=user["password"],
