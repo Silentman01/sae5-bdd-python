@@ -1,13 +1,15 @@
+from pymongo import MongoClient
 import csv
+from bson import ObjectId
 import schedule
 import time
-from pymongo import MongoClient
 from datetime import datetime
 
 # Connexion à la bdd MongoDB
 client = MongoClient("mongodb://localhost:27017")
-# Nom de notre bdd
-db = client.sae5bdd
+# bdd de test
+#db = client.sae5bdd
+db = client.socialnetworkdb
 
 # Importer en CSV
 def import_data_from_csv(filename: str, collection_name: str) -> None:
@@ -28,18 +30,19 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
         - Vérifie si le document existe déjà
         - Insère uniquement les documents qui n'existent pas dans la collection
     """
-    with open(filename, 'r') as csvfile:
+    with open(filename, 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             # On récupère un champs unique qui permettra de vérifier si le document existe déjà
-            if collection_name == "User":
+            if collection_name == "users":
                 unique_field = {"mail": row['mail']}
-            elif collection_name == "Group":
+            elif collection_name == "group":
                 unique_field = {"name": row['name']}
-            elif collection_name == "Pages":
+            elif collection_name == "pages":
                 unique_field = {"name": row['name']}
-            elif collection_name in ["Post", "PrivateMessage"]:
-                unique_field = {"id": row['id']}
+            elif collection_name in ["posts", "privates_messages"]:
+                # Pas besoin de vérifier pour posts et privates_messages car il peut en avoir plusieurs identiques
+                unique_field = None
             else:
                 print(f"La collection {collection_name} n'existe pas")
                 return
@@ -49,15 +52,14 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                 continue
 
             # Création du document en fonction de la collection
-            if collection_name == "User":
+            if collection_name == "users":
                 document = {
-                    "id": row['id'],
                     "username": row['username'],
                     "avatar": row['avatar'],
                     "bio": row['bio'],
                     "interests": row['interests'].split(',') if row['interests'] else [],
-                    "firstname": row['firstname'],
-                    "lastname": row['lastname'],
+                    "first_name": row['first_name'],
+                    "last_name": row['last_name'],
                     "mail": row['mail'],
                     "password": row['password'],
                     "role": row['role'],
@@ -67,18 +69,16 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                     "pages": row['pages'].split(',') if row['pages'] else [],
                     "createdAt": row['createdAt']
                 }
-            elif collection_name == "Group":
+            elif collection_name == "group":
                 document = {
-                    "id": row['id'],
                     "name": row['name'],
                     "description": row['description'],
                     "members": row['members'].split(',') if row['members'] else [],
                     "createdBy": row['createdBy'],
                     "createdAt": row['createdAt']
                 }
-            elif collection_name == "Post":
+            elif collection_name == "posts":
                 document = {
-                    "id": row['id'],
                     "userId": row['userId'],
                     "content": row['content'],
                     "image": row['image'],
@@ -86,17 +86,15 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                     "comments": eval(row['comments']) if row['comments'] else [],
                     "createdAt": row['createdAt']
                 }
-            elif collection_name == "PrivateMessage":
+            elif collection_name == "privates_messages":
                 document = {
-                    "id": row['id'],
                     "sender_id": row['sender_id'],
                     "receiver_id": row['receiver_id'],
                     "content": row['content'],
                     "createdAt": row['createdAt']
                 }
-            elif collection_name == "Pages":
+            elif collection_name == "pages":
                 document = {
-                    "id": row['id'],
                     "name": row['name'],
                     "description": row['description'],
                     "followers": row['followers'].split(',') if row['followers'] else [],
@@ -109,11 +107,13 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
     print("Importation csv: terminé")
 
 # On importe des données d'exemple
-import_data_from_csv('csv data/imports/user_data.csv', 'User')
-import_data_from_csv('csv data/imports/group_data.csv', 'Group')
-import_data_from_csv('csv data/imports/post_data.csv', 'Post')
-import_data_from_csv('csv data/imports/privateMessage_data.csv', 'PrivateMessage')
-import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
+"""
+import_data_from_csv('csv data/imports/user_data.csv', 'users')
+import_data_from_csv('csv data/imports/group_data.csv', 'group')
+import_data_from_csv('csv data/imports/post_data.csv', 'posts')
+import_data_from_csv('csv data/imports/privates_messages_data.csv', 'privates_messages')
+import_data_from_csv('csv data/imports/pages_data.csv', 'pages')
+"""
 
 
 # Exporter en CSV
@@ -155,17 +155,18 @@ def export_data_to_csv(filename: str, collection_name: str) -> None:
         for doc in documents:
             # On créer la ligne csv à partir des données du document, on met une chaîne vide s'il y a rien
             row = {field: doc.get(field, '') for field in all_fields}
-            print(row)
             writer.writerow(row)
 
     print("Exporation CSV: terminé")    
 
 # Exemple d'utilisation pour exporter les collections
-# export_data_to_csv('csv data/exports/user_export.csv', 'User')
-# export_data_to_csv('csv data/exports/group_export.csv', 'Group')
-# export_data_to_csv('csv data/exports/post_export.csv', 'Post')
-# export_data_to_csv('csv data/exports/privateMessage_export.csv', 'PrivateMessage')
-# export_data_to_csv('csv data/exports/pages_export.csv', 'Pages')
+"""
+export_data_to_csv('csv data/exports/user_export.csv', 'users')
+export_data_to_csv('csv data/exports/group_export.csv', 'group')
+export_data_to_csv('csv data/exports/post_export.csv', 'posts')
+export_data_to_csv('csv data/exports/privates_messages_export.csv', 'privates_messages')
+export_data_to_csv('csv data/exports/pages_export.csv', 'pages')
+"""
 
 # Sauvegarde de la bdd MongoDB
 def daily_backup():
@@ -173,7 +174,7 @@ def daily_backup():
     Fonction de sauvegarde de la bdd : Exporte toutes les collections vers des fichiers CSV
     """
     # Liste des collections à sauvegarder
-    collections = ["User", "Group", "Post", "PrivateMessage", "Pages"]
+    collections = ["users", "group", "posts", "privates_messages", "pages"]
     
     # Date actuelle pour nommer les fichiers
     current_date = datetime.now().strftime("%d-%m-%Y")
