@@ -70,7 +70,8 @@ def sync_posts():
     """
     for post in db.Post.find():
         post_id = post["id"]
-        neo4j_post = Node("Post", id=post_id,
+        neo4j_post = Node("Post",
+                          id=post_id,
                           content=post["content"],
                           image=post["image"], 
                           createdAt=post["createdAt"])
@@ -82,9 +83,31 @@ def sync_posts():
         if neo4j_user:
             neo4j_graph.merge(Relationship(neo4j_user, "POSTED", neo4j_post))
 
+def sync_privateMessages():
+    """
+    Synchronise la collection PrivateMessage de MongoDB vers neo4j et créé les relations entre l'émetteur et le récepteur
+    """
+    for privateMessage in db.PrivateMessage.find():
+        privateMessage_id = privateMessage["id"]
+        neo4j_privateMessage = Node("PrivateMessage",
+                                    id=privateMessage_id,
+                                    content=privateMessage["content"],
+                                    createdAt=privateMessage["createdAt"]
+                                    )
+        neo4j_graph.merge(neo4j_privateMessage, "PrivateMessage", "id")
+
+        # Créer la relation "SEND_MESSAGE" et "RECEIVE_MESSAGE" entre les deux utilisateurs et le message
+        sender_id = privateMessage["sender_id"]
+        receiver_id = privateMessage["receiver_id"]
+        neo4j_sender = matcher.match("User", id=sender_id).first()
+        neo4j_receiver = matcher.match("User", id=receiver_id).first()
+        if neo4j_sender and neo4j_receiver:
+            neo4j_graph.merge(Relationship(neo4j_sender, "SEND_MESSAGE", neo4j_privateMessage))
+            neo4j_graph.merge(Relationship(neo4j_privateMessage, "RECEIVE_MESSAGE", neo4j_receiver))
+
 def sync_friendships():
     """
-    Synchronise les relations d'amitié entre utilisateurs de MongoDB vers Neo4j.
+    Synchronise les relations d'amitié entre les User de MongoDB vers Neo4j
     """
     for user in db.User.find():
         user_id = user["id"]
@@ -97,7 +120,7 @@ def sync_friendships():
 
 def sync_memberships():
     """
-    Synchronise les relations de membre entre utilisateurs et groupes de MongoDB vers Neo4j.
+    Synchronise les relations de membre entre User et Group de MongoDB vers neo4j
     """
     for user in db.User.find():
         user_id = user["id"]
@@ -110,7 +133,7 @@ def sync_memberships():
 
 def sync_page_follows():
     """
-    Synchronise les relations de suivi entre utilisateurs et pages de MongoDB vers Neo4j.
+    Synchronise les relations de suivi entre User et Pages de MongoDB vers Neo4j
     """
     for user in db.User.find():
         user_id = user["id"]
@@ -123,7 +146,7 @@ def sync_page_follows():
 
 def sync_likes():
     """
-    Synchronise les relations "LIKE" entre User et Post de MongoDB vers Neo4j.
+    Synchronise les relations j'aime entre User et Post de MongoDB vers Neo4j
     """
     for post in db.Post.find():
         post_id = post["id"]
@@ -142,6 +165,7 @@ def full_synchronization():
     sync_groups()
     sync_pages()
     sync_posts()
+    sync_privateMessages()
     sync_friendships()
     sync_memberships()
     sync_page_follows()

@@ -1,3 +1,5 @@
 id,username,avatar,bio,interests,firstname,lastname,mail,password,role,birthdate,friends,groups,pages,createdAt
 1,yassine_elhali,avatar1.png,"Étudiant à l'IUT de Lens","1","Yassine","El Hali","exemple@mail.com","token.exemple.a1b2c3","user","01-01-2024",,"1,2",,"01-01-2024"
 2,wissem_inoubli,avatar2.png,"Enseignant à l'IUT de Lens","2","Wissem", "Inoubli","exemple2@mail.com","token.exemple.a1b2c3","admin","01-01-2024",,"2","1","01-01-2024"
+3,jean,avatar3.png,"jean doe","1, 2","Jean","Doe","exemple3@mail.com","token.exemple.a1b2c3","user","01-01-2024",,,,"01-01-2024"
+4,jane,avatar4.png,"jane doe",,"Jane", "Doe","exemple4@mail.com","token.exemple.a1b2c3","user","01-01-2024",,"1,2","1","01-01-2024"
