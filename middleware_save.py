@@ -24,6 +24,7 @@ def sync_users():
                           avatar_url=user["avatar_url"], 
                           full_name=user["full_name"],
                           email=user["email"],
+                          password=user["password"],
                           birthdate=user["birthdate"], 
                           interests=user["interests"],
                           created_at=user["created_at"])
@@ -75,7 +76,7 @@ def sync_posts():
         user_id = post["user_id"]
         neo4j_user = matcher.match("Users", id=user_id).first()
         if neo4j_user:
-            neo4j_graph.merge(Relationship(neo4j_user, "CREATES", neo4j_post))
+            neo4j_graph.merge(Relationship(neo4j_user, "POSTED", neo4j_post))
 
 def sync_friendships():
     """
@@ -144,11 +145,14 @@ def full_synchronization():
     
     print("Synchro middleware: terminé")
 
-# Planification de la synchronisation quotidienne à minuit
-schedule.every().day.at("00:00").do(full_synchronization)
+full_synchronization()
+
+"""# Planification de la synchronisation quotidienne à minuit
+schedule.every().day.at("09:40").do(full_synchronization)
 
 # Boucle pour vérifier s'il est l'heure de faire la synchro
 while True:
     print("En attente de la prochaine synchronisation...")
     schedule.run_pending()
     time.sleep(5)
+"""
