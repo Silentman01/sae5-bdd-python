@@ -3,7 +3,6 @@ import time
 from pymongo import MongoClient
 from py2neo import Graph, Node, Relationship, NodeMatcher
 from bson.binary import Binary
-from datetime import datetime
 
 # Connexion à la bdd MongoDB
 mongo_client = MongoClient("mongodb://localhost:27017")
@@ -62,10 +61,15 @@ def sync_groups():
                            id=group_id,
                            name=group["name"],
                            description=group["description"], 
-                           createdBy=createdBy_id,
                            createdAt=group["createdAt"])
         # Pareil que dans sync_users()
         neo4j_graph.merge(neo4j_group, "Group", "id")
+
+        # Créer la relation "CREATES" entre l'utilisateur et son post
+        userId = createdBy_id
+        neo4j_user = matcher.match("Users", id=userId).first()
+        if neo4j_user:
+            neo4j_graph.merge(Relationship(neo4j_user, "CREATED_GROUP", neo4j_group))
         
     print("Synch group: terminé")
 
@@ -217,14 +221,13 @@ def full_synchronization():
     
     print("Synchro middleware: terminé")
 
-full_synchronization()
+#full_synchronization()
 
-"""# Planification de la synchronisation quotidienne à minuit
-schedule.every().day.at("09:40").do(full_synchronization)
+# Planification de la synchronisation quotidienne à minuit
+schedule.every().day.at("00:00").do(full_synchronization)
 
 # Boucle pour vérifier s'il est l'heure de faire la synchro
 while True:
     print("En attente de la prochaine synchronisation...")
     schedule.run_pending()
-    time.sleep(5)
-"""
+    time.sleep(120)
