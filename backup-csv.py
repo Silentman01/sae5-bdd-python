@@ -32,13 +32,13 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
         reader = csv.DictReader(csvfile)
         for row in reader:
             # On récupère un champs unique qui permettra de vérifier si le document existe déjà
-            if collection_name == "Users":
-                unique_field = {"email": row['email']}
-            elif collection_name == "Groups":
+            if collection_name == "User":
+                unique_field = {"mail": row['mail']}
+            elif collection_name == "Group":
                 unique_field = {"name": row['name']}
             elif collection_name == "Pages":
                 unique_field = {"name": row['name']}
-            elif collection_name in ["Posts", "Messages"]:
+            elif collection_name in ["Post", "PrivateMessage"]:
                 unique_field = {"id": row['id']}
             else:
                 print(f"La collection {collection_name} n'existe pas")
@@ -49,47 +49,50 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                 continue
 
             # Création du document en fonction de la collection
-            if collection_name == "Users":
+            if collection_name == "User":
                 document = {
                     "id": row['id'],
                     "username": row['username'],
                     "avatar": row['avatar'],
-                    "full_name": row['full_name'],
-                    "email": row['email'],
-                    "password": row['password'],
-                    "birthdate": row['birthdate'],
+                    "bio": row['bio'],
                     "interests": row['interests'].split(',') if row['interests'] else [],
+                    "firstname": row['firstname'],
+                    "lastname": row['lastname'],
+                    "mail": row['mail'],
+                    "password": row['password'],
+                    "role": row['role'],
+                    "birthdate": row['birthdate'],
                     "friends": row['friends'].split(',') if row['friends'] else [],
                     "groups": row['groups'].split(',') if row['groups'] else [],
                     "pages": row['pages'].split(',') if row['pages'] else [],
-                    "created_at": row['created_at']
+                    "createdAt": row['createdAt']
                 }
-            elif collection_name == "Groups":
+            elif collection_name == "Group":
                 document = {
                     "id": row['id'],
                     "name": row['name'],
                     "description": row['description'],
                     "members": row['members'].split(',') if row['members'] else [],
-                    "created_by": row['created_by'],
-                    "created_at": row['created_at']
+                    "createdBy": row['createdBy'],
+                    "createdAt": row['createdAt']
                 }
-            elif collection_name == "Posts":
+            elif collection_name == "Post":
                 document = {
                     "id": row['id'],
-                    "user_id": row['user_id'],
+                    "userId": row['userId'],
                     "content": row['content'],
-                    "media_url": row['media_url'],
+                    "image": row['image'],
                     "likes": row['likes'].split(',') if row['likes'] else [],
                     "comments": eval(row['comments']) if row['comments'] else [],
-                    "created_at": row['created_at']
+                    "createdAt": row['createdAt']
                 }
-            elif collection_name == "Messages":
+            elif collection_name == "PrivateMessage":
                 document = {
                     "id": row['id'],
                     "sender_id": row['sender_id'],
                     "receiver_id": row['receiver_id'],
                     "content": row['content'],
-                    "created_at": row['created_at']
+                    "createdAt": row['createdAt']
                 }
             elif collection_name == "Pages":
                 document = {
@@ -97,8 +100,8 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
                     "name": row['name'],
                     "description": row['description'],
                     "followers": row['followers'].split(',') if row['followers'] else [],
-                    "created_by": row['created_by'],
-                    "created_at": row['created_at']
+                    "createdBy": row['createdBy'],
+                    "createdAt": row['createdAt']
                 }
             
             # Insérer le document dans la collection
@@ -106,10 +109,10 @@ def import_data_from_csv(filename: str, collection_name: str) -> None:
     print("Importation csv: terminé")
 
 # On importe des données d'exemple
-import_data_from_csv('csv data/imports/users_data.csv', 'Users')
-import_data_from_csv('csv data/imports/groups_data.csv', 'Groups')
-import_data_from_csv('csv data/imports/posts_data.csv', 'Posts')
-import_data_from_csv('csv data/imports/messages_data.csv', 'Messages')
+import_data_from_csv('csv data/imports/user_data.csv', 'User')
+import_data_from_csv('csv data/imports/group_data.csv', 'Group')
+import_data_from_csv('csv data/imports/post_data.csv', 'Post')
+import_data_from_csv('csv data/imports/privateMessage_data.csv', 'PrivateMessage')
 import_data_from_csv('csv data/imports/pages_data.csv', 'Pages')
 
 
@@ -158,10 +161,10 @@ def export_data_to_csv(filename: str, collection_name: str) -> None:
     print("Exporation CSV: terminé")    
 
 # Exemple d'utilisation pour exporter les collections
-# export_data_to_csv('csv data/exports/users_export.csv', 'Users')
-# export_data_to_csv('csv data/exports/groups_export.csv', 'Groups')
-# export_data_to_csv('csv data/exports/posts_export.csv', 'Posts')
-# export_data_to_csv('csv data/exports/messages_export.csv', 'Messages')
+# export_data_to_csv('csv data/exports/user_export.csv', 'User')
+# export_data_to_csv('csv data/exports/group_export.csv', 'Group')
+# export_data_to_csv('csv data/exports/post_export.csv', 'Post')
+# export_data_to_csv('csv data/exports/privateMessage_export.csv', 'PrivateMessage')
 # export_data_to_csv('csv data/exports/pages_export.csv', 'Pages')
 
 # Sauvegarde de la bdd MongoDB
@@ -170,7 +173,7 @@ def daily_backup():
     Fonction de sauvegarde de la bdd : Exporte toutes les collections vers des fichiers CSV
     """
     # Liste des collections à sauvegarder
-    collections = ["Users", "Groups", "Posts", "Messages", "Pages"]
+    collections = ["User", "Group", "Post", "PrivateMessage", "Pages"]
     
     # Date actuelle pour nommer les fichiers
     current_date = datetime.now().strftime("%d-%m-%Y")
