@@ -14,6 +14,7 @@ db = mongo_client.socialnetworkdb
 neo4j_graph = Graph("bolt://localhost:7687", auth=("neo4j", "rootroot"))
 matcher = NodeMatcher(neo4j_graph)
 
+# Fonction pour converti de binaire en un string car on peut pas enregistrer en Binary directement
 def binary_id_to_str(id):
     """
     Convertit un champ de type Binary en chaîne de caractères.

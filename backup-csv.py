@@ -4,12 +4,22 @@ from bson import ObjectId
 import schedule
 import time
 from datetime import datetime
+from bson.binary import Binary
 
 # Connexion à la bdd MongoDB
 client = MongoClient("mongodb://localhost:27017")
 # bdd de test
 #db = client.sae5bdd
 db = client.socialnetworkdb
+
+# Fonction pour converti de binaire en un string car on peut pas enregistrer en Binary directement
+def binary_id_to_str(id):
+    """
+    Convertit un champ de type Binary en chaîne de caractères.
+    """
+    if isinstance(id, Binary):
+        return id.hex()
+    return str(id)
 
 # Importer en CSV
 def import_data_from_csv(filename: str, collection_name: str) -> None:
@@ -147,26 +157,42 @@ def export_data_to_csv(filename: str, collection_name: str) -> None:
         all_fields.update(doc.keys())
     all_fields = sorted(all_fields)
 
-    with open(filename, 'w', newline='') as csvfile:
+    with open(filename, 'w', newline='', encoding='utf-8') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=all_fields)
         # On écrit les en-têtes dans le csv, ceux indiqués dans le paramètre "fieldnames" du writer
         writer.writeheader()
         
         for doc in documents:
-            # On créer la ligne csv à partir des données du document, on met une chaîne vide s'il y a rien
-            row = {field: doc.get(field, '') for field in all_fields}
+            row = {}
+                
+            # On insère tout les champs à partir du document, sauf _id car déjà inséré au dessus
+            for field in all_fields:
+                # Si un champs est de type Binary, on le converti en str car sinon il sera illisible dans le csv
+                if type(doc.get(field)) == Binary:
+                    valeur = binary_id_to_str(doc.get(field))
+                
+                # Si un champs est une liste non vide, et qu'elle contient des éléments de type Binary
+                # on les convertis en str également
+                elif type(doc.get(field)) == list and len(doc.get(field)) > 0 and type(doc.get(field)[0]) == Binary:
+                    valeur = [binary_id_to_str(element) for element in doc.get(field)]
+                    print(valeur)
+                else:
+                    valeur = doc.get(field, '')
+
+                row[field] = valeur
+
             writer.writerow(row)
 
-    print("Exporation CSV: terminé")    
+    print("Exporation CSV: terminé")
 
 # Exemple d'utilisation pour exporter les collections
-"""
+"""export_data_to_csv('csv data/exports/pages_export.csv', 'pages')
 export_data_to_csv('csv data/exports/user_export.csv', 'users')
 export_data_to_csv('csv data/exports/group_export.csv', 'group')
 export_data_to_csv('csv data/exports/post_export.csv', 'posts')
 export_data_to_csv('csv data/exports/privates_messages_export.csv', 'privates_messages')
-export_data_to_csv('csv data/exports/pages_export.csv', 'pages')
-"""
+export_data_to_csv('csv data/exports/pages_export.csv', 'pages')"""
+
 
 # Sauvegarde de la bdd MongoDB
 def daily_backup():
@@ -186,11 +212,11 @@ def daily_backup():
     
     print("Sauvegarde terminée.")
 
-# Planifier la sauvegarde tous les jours à 00h00
+"""# Planifier la sauvegarde tous les jours à 00h00
 schedule.every().day.at("00:00").do(daily_backup)
 
 # Boucle pour vérifier s'il est temps de faire la sauvegarde
 while True:
     print("En attente de la prochaine sauvegarde...")
     schedule.run_pending()
-    time.sleep(120)
+    time.sleep(120)"""
