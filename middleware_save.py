@@ -183,11 +183,14 @@ def sync_page_follows():
         user_id = binary_id_to_str(user["_id"])
         neo4j_user = matcher.match("Users", id=user_id).first()
         if neo4j_user:
-            for page_id in user.get("pages", []):
-                page_id = binary_id_to_str(page_id)
-                page = matcher.match("Pages", id=page_id).first()
-                if page:
-                    neo4j_graph.merge(Relationship(neo4j_user, "FOLLOWS", page))
+            user_pages = user.get("pages")
+            if len(user_pages) > 0:
+                for page_id in user_pages:
+                    page_id = binary_id_to_str(page_id)
+                    print(page_id)
+                    page = matcher.match("Pages", id=page_id).first()
+                    if page:
+                        neo4j_graph.merge(Relationship(neo4j_user, "FOLLOWS", page))
         
     print("Synch FOLLOWS: terminé")
 
